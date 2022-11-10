@@ -65,6 +65,40 @@ def create():
 
     return render_template('create.html')
 
+@app.route('/healthz')
+def status():
+    response = app.response_class(
+          response=json.dumps({"result":"OK - healthy"}),
+          status=200,
+          mimetype='application/json'
+    )
+
+    return response
+
+@app.route('/metrics')
+def metrics():
+    posts = get_posts()
+    post_count = len(posts)
+
+
+    response = app.response_class(
+        response=json.dumps({"db_connection_count": db_connection_count,"post_count": post_count}),
+        status=200,
+        mimetype='application/json'
+    )
+
+    return response
+
+def init_logger():
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(levelname)s:%(name)s:%(asctime)s, %(message)s', '%d/%m/%Y, %H:%M:%S')
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+
 # start the application on port 3111
 if __name__ == "__main__":
    app.run(host='0.0.0.0', port='3111')
